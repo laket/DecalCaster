@@ -17,27 +17,33 @@ using StringImageMaker.StringDrawing;
 public class DecalCasterController : MonoBehaviour {
     public GameObject decalPrefab_;
     private StringDrawer drawer_;
+    private List<GameObject> decals_;
 
 	// Use this for initialization
 	void Start () {
         FontManager fontManager = new FontManager(
-            new string[] { "meiryo UI" },
-            minSize: 14,
-            maxSize: 14
+            new string[] { "meiryo UI"},
+            minSize: 8,
+            maxSize: 11
         );
         IMessageCreator messageCreator = RandomCharactorCreator.makeNumericCreator(minLen_: 3, maxLen_: 7);
 
         drawer_ = new StringDrawer(messageCreator, fontManager);
+        decals_ = new List<GameObject>();
     }
 
-    void makeObject(Vector3 pos)
+    void makeObject(Vector3 pos, Ray ray)
     {
         // デバッグ用にいきなりDecalを作成する
         GameObject go = Instantiate(decalPrefab_) as GameObject;
 
         //go.transform.position = new Vector3(0, 1.37f, 0);
         go.transform.position = pos;
-        go.transform.localScale = new Vector3(1, 2, 1);
+        go.transform.localScale = new Vector3(1, 1.0f, 1);
+        go.transform.rotation = UnityEngine.Quaternion.Euler(ray.direction);
+        go.transform.LookAt(pos + ray.direction);
+        //go.transform.localRotation = UnityEngine.Quaternion.Euler(new Vector3(0.0f,1.0f,0.0f));
+        Debug.Log(ray.direction);
 
         // テクスチャ差し替え
         //Bitmap bitmap = new Bitmap(Application.dataPath + "/logo.jpg");
@@ -85,6 +91,8 @@ public class DecalCasterController : MonoBehaviour {
         go.GetComponent<Decal>().m_Material = Instantiate(go.GetComponent<Decal>().m_Material);
         go.GetComponent<Decal>().m_Material.mainTexture = texture;
         //go.GetComponent<Decal>().GetComponent<Renderer>().material.mainTexture = texture;
+
+        decals_.Add(go);
     }
 
     // Update is called once per frame
@@ -97,8 +105,18 @@ public class DecalCasterController : MonoBehaviour {
             if (Physics.Raycast(ray, out hit))
             {
                 Vector3 hitpos = hit.point;
-                makeObject(hitpos);
+                
+                makeObject(hitpos, ray);
             }
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            foreach(var go in decals_)
+            {
+                Destroy(go);
+            }
+
         }
     }
 
