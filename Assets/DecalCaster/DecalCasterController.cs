@@ -20,7 +20,6 @@ public class DecalCasterController : MonoBehaviour {
     private List<GameObject> decals_;
     private int shotCount_;
 
-
     // Use this for initialization
     void Start () {
         FontManager fontManager = new FontManager(
@@ -118,6 +117,15 @@ public class DecalCasterController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.S)) {
             ScreenCapture.CaptureScreenshot("screen" + shotCount_.ToString() + ".png");
             shotCount_++;
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            foreach(var go in decals_)
+            {
+                Destroy(go);
+            }
+
         }
 
         if (Input.GetMouseButtonDown(1))
