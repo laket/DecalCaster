@@ -18,18 +18,21 @@ public class DecalCasterController : MonoBehaviour {
     public GameObject decalPrefab_;
     private StringDrawer drawer_;
     private List<GameObject> decals_;
+    private int shotCount_;
 
-	// Use this for initialization
-	void Start () {
+
+    // Use this for initialization
+    void Start () {
         FontManager fontManager = new FontManager(
-            new string[] { "meiryo UI"},
-            minSize: 8,
-            maxSize: 11
+            new string[] { "meiryo UI", "Segoe Script"},
+            minSize: 40,
+            maxSize: 40
         );
         IMessageCreator messageCreator = RandomCharactorCreator.makeNumericCreator(minLen_: 3, maxLen_: 7);
 
         drawer_ = new StringDrawer(messageCreator, fontManager);
         decals_ = new List<GameObject>();
+        shotCount_ = 0;
     }
 
     void makeObject(Vector3 pos, Ray ray)
@@ -95,6 +98,7 @@ public class DecalCasterController : MonoBehaviour {
         decals_.Add(go);
     }
 
+
     // Update is called once per frame
     void Update () {
 		if (Input.GetMouseButtonDown(0))
@@ -108,6 +112,12 @@ public class DecalCasterController : MonoBehaviour {
                 
                 makeObject(hitpos, ray);
             }
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.S)) {
+            ScreenCapture.CaptureScreenshot("screen" + shotCount_.ToString() + ".png");
+            shotCount_++;
         }
 
         if (Input.GetMouseButtonDown(1))

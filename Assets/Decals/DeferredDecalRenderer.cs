@@ -50,7 +50,7 @@ public class DeferredDecalRenderer : MonoBehaviour
 
     public void OnDisable()
 	{
-        if (commandBuffer_ != null)
+        if (commandBuffer_ != null && Camera.main != null)
         {
             Camera.main.RemoveCommandBuffer(targetEvent, commandBuffer_);
         }
