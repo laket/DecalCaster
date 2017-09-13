@@ -16,6 +16,8 @@ namespace StringImageMaker.StringDrawing
             messageCreator_ = messageCreator;
             fontManager_ = fontManager;
             sizeCalculator_ = new FontSizeCalculator();
+            random_ = new Random();
+
         }
 
         /// <summary>
@@ -33,7 +35,14 @@ namespace StringImageMaker.StringDrawing
             Bitmap canvas = new Bitmap(width: imageSize.Width, height: imageSize.Height, format: System.Drawing.Imaging.PixelFormat.Format32bppArgb); 
             Graphics g = Graphics.FromImage(canvas);
             g.Clear(Color.FromArgb(alpha:0, red:0, green:0, blue:0));
-            SolidBrush brush = new SolidBrush(Color.FromArgb(255,155,155,155));
+
+            int alpha = random_.Next(220, 255);
+            int red = random_.Next(255);
+            int green = random_.Next(255);
+            int blue = random_.Next(255);
+
+            //SolidBrush brush = new SolidBrush(Color.FromArgb(255,155,155,155));
+            SolidBrush brush = new SolidBrush(Color.FromArgb(alpha, red, green, blue));            
             g.DrawString(curMessage, curFont, brush, x: 0, y: 0, format:StringFormat.GenericTypographic);
 
             g.Dispose();
@@ -44,5 +53,6 @@ namespace StringImageMaker.StringDrawing
         IMessageCreator messageCreator_;
         FontManager fontManager_;
         FontSizeCalculator sizeCalculator_;
+        Random random_;
     }
 }

@@ -23,7 +23,7 @@ public class DecalCasterController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         FontManager fontManager = new FontManager(
-            new string[] { "meiryo UI", "Segoe Script"},
+            new string[] { "meiryo UI", "Segoe Script", "SketchFlow Print"},
             minSize: 40,
             maxSize: 40
         );
