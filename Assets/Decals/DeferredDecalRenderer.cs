@@ -45,12 +45,14 @@ public class DeferredDecalRenderer : MonoBehaviour
     private CommandBuffer commandBuffer_;
     public Mesh m_Mesh;
 
+    const CameraEvent targetEvent = CameraEvent.BeforeLighting;
+
 
     public void OnDisable()
 	{
         if (commandBuffer_ != null)
         {
-            Camera.main.RemoveCommandBuffer(CameraEvent.BeforeLighting, commandBuffer_);
+            Camera.main.RemoveCommandBuffer(targetEvent, commandBuffer_);
         }
 	}
 
@@ -82,14 +84,11 @@ public class DeferredDecalRenderer : MonoBehaviour
         {
             commandBuffer_ = new CommandBuffer();
             commandBuffer_.name = "Deferred decals";
-            cam.AddCommandBuffer(CameraEvent.BeforeLighting, commandBuffer_);
+            cam.AddCommandBuffer(targetEvent, commandBuffer_);
         }
         else {
             commandBuffer_.Clear();
         }
-
-
-        Debug.Log("Decal3");
 
         // copy g-buffer normals into a temporary RT
         var normalsID = Shader.PropertyToID("_NormalsCopy");
@@ -99,9 +98,7 @@ public class DeferredDecalRenderer : MonoBehaviour
 		commandBuffer_.SetRenderTarget (BuiltinRenderTextureType.GBuffer0, BuiltinRenderTextureType.CameraTarget);
 		foreach (var decal in system.m_DecalsDiffuse)
 		{
-            Debug.Log("decal " + decal.GetHashCode().ToString());
-            //commandBuffer_.DrawMesh (decal.m_Cube, decal.transform.localToWorldMatrix, decal.m_Material);
-            commandBuffer_.DrawMesh(m_Mesh, decal.transform.localToWorldMatrix, decal.m_Material);
+            commandBuffer_.DrawMesh(decal.m_Cube, decal.transform.localToWorldMatrix, decal.m_Material);
         }
 		// release temporary normals RT
 		commandBuffer_.ReleaseTemporaryRT (normalsID);

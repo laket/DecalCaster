@@ -90,7 +90,8 @@ Shader "Decal/DecalShader"
 				//clip (float2(0.5,0.5) - abs(opos.xz));
 
 				// clipと組み合わせると 0<=xz<=1の範囲のみ描画する
-				i.uv = opos.xz+0.5;
+				//i.uv = opos.xz+0.5;
+				i.uv = opos.xy + 0.5;
 
 				//_NormalsCopyはDeferredDecalRenderer.csから来ている
 				//スクリーン上でうつっている位置からそこの法線を取り出す
@@ -98,7 +99,9 @@ Shader "Decal/DecalShader"
 				//値域を[0,1]に変換
 				fixed3 wnormal = normal.rgb * 2.0 - 1.0;
 				//法線の向きが cos(theta) = 0.3より小さければカット()
-				clip (dot(wnormal, i.orientation) - 0.1);
+				
+				// TODO: xzからxyに切り替えた点を反映する
+				//clip (dot(wnormal, i.orientation) - 0.1);
 
 				fixed4 col = tex2D (_MainTex, i.uv);
 				return col;

@@ -33,7 +33,8 @@ namespace StringImageMaker.StringDrawing
             Bitmap canvas = new Bitmap(width: imageSize.Width, height: imageSize.Height, format: System.Drawing.Imaging.PixelFormat.Format32bppArgb); 
             Graphics g = Graphics.FromImage(canvas);
             g.Clear(Color.FromArgb(alpha:0, red:0, green:0, blue:0));
-            g.DrawString(curMessage, curFont, Brushes.Black, x: 0, y: 0, format:StringFormat.GenericTypographic);
+            SolidBrush brush = new SolidBrush(Color.FromArgb(255,155,155,155));
+            g.DrawString(curMessage, curFont, brush, x: 0, y: 0, format:StringFormat.GenericTypographic);
 
             g.Dispose();
 
