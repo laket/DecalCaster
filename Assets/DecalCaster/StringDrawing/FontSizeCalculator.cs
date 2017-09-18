@@ -14,7 +14,7 @@ namespace StringImageMaker.StringDrawing
         public FontSizeCalculator()
         {
             // MEMO: このBitmapのサイズ影響を調べる
-            canvas_ = new Bitmap(width: 512, height: 128);
+            canvas_ = new Bitmap(width: 1024, height: 128);
             graphics_ = Graphics.FromImage(canvas_);
             //graphics_.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
         }

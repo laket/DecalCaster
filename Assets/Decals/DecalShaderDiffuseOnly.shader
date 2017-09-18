@@ -37,6 +37,11 @@ Shader "Decal/DecalShader"
 				half3 orientation : TEXCOORD3;
 			};
 
+			struct COL_OUTPUT {
+				fixed4 Col0 : SV_TARGET0;
+				fixed4 Mask : SV_TARGET1;
+			};
+
 			v2f vert (float4 v : POSITION)
 			{
 				v2f o;
@@ -57,6 +62,8 @@ Shader "Decal/DecalShader"
 			sampler2D_float _CameraDepthTexture;
 			sampler2D _NormalsCopy;
 
+
+
 			//void frag(
 			//	v2f i,
 			//	out half4 outDiffuse : COLOR0,			// RT0: diffuse color (rgb), --unused-- (a)
@@ -64,7 +71,7 @@ Shader "Decal/DecalShader"
 			//	out half4 outNormal : COLOR2,			// RT2: normal (rgb), --unused-- (a)
 			//	out half4 outEmission : COLOR3			// RT3: emission (rgb), --unused-- (a)
 			//)
-			fixed4 frag(v2f i) : SV_Target
+			COL_OUTPUT frag(v2f i) : SV_Target
 			{
 				// (カメラのFar Plane / テクセルのビュー空間での場所)
 				// Far Plane上での場所に変換？
@@ -83,11 +90,11 @@ Shader "Decal/DecalShader"
 
 				// この値が負になったら描画をやめる (テクスチャが入る範囲だけ描画するやつに近い)
 				// これを抜くとテクスチャが複数でてしまう
-				clip (float3(0.5,0.5,0.5) - abs(opos.xyz));
+				//clip (float3(0.5,0.5,0.5) - abs(opos.xyz));
 				// 以下だと丸くテクスチャがはられる
 				//clip (0.4 - distance(float3(0.0,0.0,0.0), abs(opos.xyz)));
 				//clip (0.4 - distance(float2(0.0,0.0), abs(opos.xz)));
-				//clip (float2(0.5,0.5) - abs(opos.xz));
+				clip (float2(0.5,0.5) - abs(opos.xy));
 
 				// clipと組み合わせると 0<=xz<=1の範囲のみ描画する
 				//i.uv = opos.xz+0.5;
@@ -102,9 +109,11 @@ Shader "Decal/DecalShader"
 				
 				// TODO: xzからxyに切り替えた点を反映する
 				//clip (dot(wnormal, i.orientation) - 0.1);
-
-				fixed4 col = tex2D (_MainTex, i.uv);
-				return col;
+				COL_OUTPUT col_out;
+				col_out.Col0 = tex2D(_MainTex, i.uv);
+				col_out.Mask = fixed4(0.0, 1.0, 1.0, 1.0);
+				//fixed4 col = tex2D (_MainTex, i.uv);
+				return col_out;
 			}
 			ENDCG
 		}		

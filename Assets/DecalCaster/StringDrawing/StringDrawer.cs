@@ -36,7 +36,8 @@ namespace StringImageMaker.StringDrawing
             Graphics g = Graphics.FromImage(canvas);
             g.Clear(Color.FromArgb(alpha:0, red:0, green:0, blue:0));
 
-            int alpha = random_.Next(220, 255);
+            //int alpha = random_.Next(220, 255);
+            int alpha = random_.Next(110, 200);
             int red = random_.Next(255);
             int green = random_.Next(255);
             int blue = random_.Next(255);

@@ -24,10 +24,10 @@ public class DecalCasterController : MonoBehaviour {
     void Start () {
         FontManager fontManager = new FontManager(
             new string[] { "meiryo UI", "Segoe Script", "SketchFlow Print"},
-            minSize: 40,
-            maxSize: 40
+            minSize: 30,
+            maxSize: 30
         );
-        IMessageCreator messageCreator = RandomCharactorCreator.makeNumericCreator(minLen_: 3, maxLen_: 7);
+        IMessageCreator messageCreator = RandomCharactorCreator.makeNumericCreator(minLen_: 3, maxLen_: 6);
 
         drawer_ = new StringDrawer(messageCreator, fontManager);
         decals_ = new List<GameObject>();
@@ -41,11 +41,11 @@ public class DecalCasterController : MonoBehaviour {
 
         //go.transform.position = new Vector3(0, 1.37f, 0);
         go.transform.position = pos;
-        go.transform.localScale = new Vector3(1, 1.0f, 1);
+        float size = 0.8f;
+        go.transform.localScale = new Vector3(size, size, size);
         go.transform.rotation = UnityEngine.Quaternion.Euler(ray.direction);
         go.transform.LookAt(pos + ray.direction);
         //go.transform.localRotation = UnityEngine.Quaternion.Euler(new Vector3(0.0f,1.0f,0.0f));
-        Debug.Log(ray.direction);
 
         // テクスチャ差し替え
         //Bitmap bitmap = new Bitmap(Application.dataPath + "/logo.jpg");

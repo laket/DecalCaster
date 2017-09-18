@@ -56,10 +56,16 @@ public class DeferredDecalRenderer : MonoBehaviour
         }
 	}
 
+    private RenderTexture backTex_;
+    private RenderTargetIdentifier backTexID_;
+
     public void Start()
     {
-        /// どのDecalよりも早くinstantiateされる必要あり
+        backTex_ = new RenderTexture(Screen.width, Screen.height, 0);
+        backTexID_ = new RenderTargetIdentifier(backTex_);
+
     }
+
 
     public void Update()
 	{
@@ -69,6 +75,24 @@ public class DeferredDecalRenderer : MonoBehaviour
 			OnDisable();
 			return;
 		}
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            //string pathOut = Application.persistentDataPath + "/back.png";
+            string pathOut = "./back.png";
+            Debug.Log("capture running : path " + pathOut);
+
+
+            Texture2D tex = new Texture2D(backTex_.width, backTex_.height);
+            RenderTexture.active = backTex_;
+
+            tex.ReadPixels(new Rect(0, 0, backTex_.width, backTex_.height), 0, 0);
+
+            byte[] bytes = tex.EncodeToPNG();
+            System.IO.File.WriteAllBytes(pathOut, bytes);
+            RenderTexture.active = null;
+        }
+
 
         var system = DecalManager.instance;
         if (!system.WaitingUpdate) {
@@ -94,9 +118,17 @@ public class DeferredDecalRenderer : MonoBehaviour
         var normalsID = Shader.PropertyToID("_NormalsCopy");
 		commandBuffer_.GetTemporaryRT (normalsID, -1, -1);
 		commandBuffer_.Blit (BuiltinRenderTextureType.GBuffer2, normalsID);
-		// render diffuse-only decals into diffuse channel
-		commandBuffer_.SetRenderTarget (BuiltinRenderTextureType.GBuffer0, BuiltinRenderTextureType.CameraTarget);
-		foreach (var decal in system.m_DecalsDiffuse)
+
+        // 位置テクスチャーをクリア
+        commandBuffer_.SetRenderTarget(backTexID_);
+        commandBuffer_.ClearRenderTarget(false, true, Color.black);
+
+        // 描画先を指定する
+        RenderTargetIdentifier[] identifiers = { BuiltinRenderTextureType.GBuffer0, backTexID_};
+		commandBuffer_.SetRenderTarget(identifiers, BuiltinRenderTextureType.CameraTarget);
+
+
+        foreach (var decal in system.m_DecalsDiffuse)
 		{
             commandBuffer_.DrawMesh(decal.m_Cube, decal.transform.localToWorldMatrix, decal.m_Material);
         }

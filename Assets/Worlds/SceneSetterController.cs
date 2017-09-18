@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class SceneSetterController : MonoBehaviour {
     GameObject dram_;
+    GameObject light_;
 
 	// Use this for initialization
 	void Start () {
         dram_ = GameObject.Find("dram_base");
+        light_ = GameObject.Find("mainlight");
 	}
 	
 	// Update is called once per frame
@@ -27,6 +29,10 @@ public class SceneSetterController : MonoBehaviour {
                 x = Random.Range(-5, 2);
             }
 
+            //light_.transform.Rotate(new Vector3(100.0f, 0.0f, 0.0f));
+            //var src = light_.transform.localRotation.eulerAngles;
+            
+            //light_.transform.localRotation = Quaternion.Euler(Random.Range(-185.0f, -175.0f), src.y, src.z);
             camera.transform.position = new Vector3(x, cpos.y, cpos.z);
         }
 	}
