@@ -1,1 +1,8 @@
 *~
+*.sln
+*.csproj
+Temp
+Debug
+Library
+Assets/System.Drawing.dll
+.vs
