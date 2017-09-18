@@ -88,16 +88,10 @@ Shader "Decal/DecalShader"
 				float3 wpos = mul (unity_CameraToWorld, vpos).xyz;
 				float3 opos = mul (unity_WorldToObject, float4(wpos,1)).xyz;
 
-				// この値が負になったら描画をやめる (テクスチャが入る範囲だけ描画するやつに近い)
-				// これを抜くとテクスチャが複数でてしまう
-				//clip (float3(0.5,0.5,0.5) - abs(opos.xyz));
-				// 以下だと丸くテクスチャがはられる
-				//clip (0.4 - distance(float3(0.0,0.0,0.0), abs(opos.xyz)));
-				//clip (0.4 - distance(float2(0.0,0.0), abs(opos.xz)));
-				clip (float2(0.5,0.5) - abs(opos.xy));
+				clip (float3(0.5,0.5,0.5) - abs(opos.xyz));
+				//clip (float2(0.5,0.5) - abs(opos.xy));
 
-				// clipと組み合わせると 0<=xz<=1の範囲のみ描画する
-				//i.uv = opos.xz+0.5;
+				// clipと組み合わせると 0<=xy<=1の範囲のみ描画する
 				i.uv = opos.xy + 0.5;
 
 				//_NormalsCopyはDeferredDecalRenderer.csから来ている
@@ -105,14 +99,14 @@ Shader "Decal/DecalShader"
 				half3 normal = tex2D(_NormalsCopy, uv).rgb;
 				//値域を[0,1]に変換
 				fixed3 wnormal = normal.rgb * 2.0 - 1.0;
-				//法線の向きが cos(theta) = 0.3より小さければカット()
-				
+				//法線の向きが cos(theta) = 0.3より小さければカット				
 				// TODO: xzからxyに切り替えた点を反映する
-				//clip (dot(wnormal, i.orientation) - 0.1);
+				//clip (dot(wnormal, i.orientation) - 0.3);
+
 				COL_OUTPUT col_out;
 				col_out.Col0 = tex2D(_MainTex, i.uv);
-				col_out.Mask = fixed4(0.0, 1.0, 1.0, 1.0);
-				//fixed4 col = tex2D (_MainTex, i.uv);
+				col_out.Mask = fixed4(0.0, 0.0, 1.0, 1.0);
+
 				return col_out;
 			}
 			ENDCG

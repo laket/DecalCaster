@@ -18,7 +18,6 @@ public class DecalCasterController : MonoBehaviour {
     public GameObject decalPrefab_;
     private StringDrawer drawer_;
     private List<GameObject> decals_;
-    private int shotCount_;
 
     // Use this for initialization
     void Start () {
@@ -31,42 +30,28 @@ public class DecalCasterController : MonoBehaviour {
 
         drawer_ = new StringDrawer(messageCreator, fontManager);
         decals_ = new List<GameObject>();
-        shotCount_ = 0;
     }
 
-    void makeObject(Vector3 pos, Ray ray)
+    Texture2D convertToTexture2D(Bitmap bitmap)
     {
-        // デバッグ用にいきなりDecalを作成する
-        GameObject go = Instantiate(decalPrefab_) as GameObject;
-
-        //go.transform.position = new Vector3(0, 1.37f, 0);
-        go.transform.position = pos;
-        float size = 0.8f;
-        go.transform.localScale = new Vector3(size, size, size);
-        go.transform.rotation = UnityEngine.Quaternion.Euler(ray.direction);
-        go.transform.LookAt(pos + ray.direction);
-        //go.transform.localRotation = UnityEngine.Quaternion.Euler(new Vector3(0.0f,1.0f,0.0f));
-
-        // テクスチャ差し替え
-        //Bitmap bitmap = new Bitmap(Application.dataPath + "/logo.jpg");
-        Bitmap bitmap = drawer_.drawNext();
-        //Bitmap bitmap = new Bitmap(width: 128, height: 128, format:System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-        System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bitmap);
-        g.Dispose();
-
         Texture2D texture = new Texture2D(bitmap.Width, bitmap.Height, TextureFormat.ARGB32, false);
 
-        var bits = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), 
-            System.Drawing.Imaging.ImageLockMode.ReadOnly, 
+        // ビットマップ上から持ってきたいピクセルがメモリ上の固定位置になるようにする
+        var bits = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+            System.Drawing.Imaging.ImageLockMode.ReadOnly,
             System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
+        // ARGB32前提であることに注意
         var copyTo = new byte[bits.Width * bits.Height * 4];
         IntPtr head = bits.Scan0;
-        
-        unsafe {
+
+        // チャンネルの順序と、行の順序がBitmapとTexture2Dで異なることを考慮しながらコピー
+        unsafe
+        {
             byte* src = (byte*)head.ToPointer();
 
-            for (int r = 0; r < bits.Height; r++) {
+            for (int r = 0; r < bits.Height; r++)
+            {
                 // Unityは下から上にデータが並んでいる
                 int toOffset = (bits.Height - 1 - r) * bits.Width * 4;
                 int fromOffset = r * bits.Width * 4;
@@ -78,7 +63,7 @@ public class DecalCasterController : MonoBehaviour {
 
                     // coypTo = ARGB
                     // bits   = BGRA
-                    copyTo[to_base]     = src[from_base + 3];
+                    copyTo[to_base] = src[from_base + 3];
                     copyTo[to_base + 1] = src[from_base + 2];
                     copyTo[to_base + 2] = src[from_base + 1];
                     copyTo[to_base + 3] = src[from_base + 0];
@@ -86,13 +71,31 @@ public class DecalCasterController : MonoBehaviour {
             }
         }
 
-        bitmap.Dispose();
         texture.LoadRawTextureData(copyTo);
         texture.Apply();
 
+        return texture;
+    }
+
+    void makeObject(Vector3 pos, Ray ray)
+    {
+        // デバッグ用にいきなりDecalを作成する
+        GameObject go = Instantiate(decalPrefab_) as GameObject;
+
+        go.transform.position = pos;
+
+        // マウスでクリックした方向にz軸が向く (xy平面に交差するあたりに文字は描写される)
+        go.transform.rotation = UnityEngine.Quaternion.Euler(ray.direction);
+        go.transform.LookAt(pos + ray.direction);
+
+        // テクスチャに文字画像をロード
+        Bitmap bitmap = drawer_.drawNext();
+        Texture2D texture = convertToTexture2D(bitmap);
+        bitmap.Dispose();
+
+        // マテリアルの参照を共有しないようにする (これをやらないと一つのテクスチャをかえると他も変わる)
         go.GetComponent<Decal>().m_Material = Instantiate(go.GetComponent<Decal>().m_Material);
         go.GetComponent<Decal>().m_Material.mainTexture = texture;
-        //go.GetComponent<Decal>().GetComponent<Renderer>().material.mainTexture = texture;
 
         decals_.Add(go);
     }
@@ -112,11 +115,6 @@ public class DecalCasterController : MonoBehaviour {
                 makeObject(hitpos, ray);
             }
 
-        }
-
-        if (Input.GetKeyDown(KeyCode.S)) {
-            ScreenCapture.CaptureScreenshot("screen" + shotCount_.ToString() + ".png");
-            shotCount_++;
         }
 
         if (Input.GetMouseButtonDown(1))

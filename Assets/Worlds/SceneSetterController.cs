@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SceneSetterController : MonoBehaviour {
-    GameObject dram_;
-    GameObject light_;
-
 	// Use this for initialization
 	void Start () {
-        dram_ = GameObject.Find("dram_base");
-        light_ = GameObject.Find("mainlight");
 	}
 	
 	// Update is called once per frame

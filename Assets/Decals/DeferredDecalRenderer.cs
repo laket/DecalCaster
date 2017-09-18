@@ -55,18 +55,25 @@ public class DeferredDecalRenderer : MonoBehaviour
             Camera.main.RemoveCommandBuffer(targetEvent, commandBuffer_);
         }
 	}
+    
+    private RenderTexture textMask_;
+    private RenderTargetIdentifier textMaskID_;
 
-    private RenderTexture backTex_;
-    private RenderTargetIdentifier backTexID_;
+    public RenderTexture TextMask
+    {
+        get { return textMask_; }
+    }
 
     public void Start()
     {
-        backTex_ = new RenderTexture(Screen.width, Screen.height, 0);
-        backTexID_ = new RenderTargetIdentifier(backTex_);
-
+        textMask_ = new RenderTexture(Screen.width, Screen.height, 0);
+        textMaskID_ = new RenderTargetIdentifier(textMask_);
     }
 
 
+    /// <summary>
+    /// DecalManagerのWaitingUpdatesがTrueであれば、CommandBufferへの描画登録を行う。
+    /// </summary>
     public void Update()
 	{
 		var act = gameObject.activeInHierarchy && enabled;
@@ -75,24 +82,6 @@ public class DeferredDecalRenderer : MonoBehaviour
 			OnDisable();
 			return;
 		}
-
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            //string pathOut = Application.persistentDataPath + "/back.png";
-            string pathOut = "./back.png";
-            Debug.Log("capture running : path " + pathOut);
-
-
-            Texture2D tex = new Texture2D(backTex_.width, backTex_.height);
-            RenderTexture.active = backTex_;
-
-            tex.ReadPixels(new Rect(0, 0, backTex_.width, backTex_.height), 0, 0);
-
-            byte[] bytes = tex.EncodeToPNG();
-            System.IO.File.WriteAllBytes(pathOut, bytes);
-            RenderTexture.active = null;
-        }
-
 
         var system = DecalManager.instance;
         if (!system.WaitingUpdate) {
@@ -120,11 +109,11 @@ public class DeferredDecalRenderer : MonoBehaviour
 		commandBuffer_.Blit (BuiltinRenderTextureType.GBuffer2, normalsID);
 
         // 位置テクスチャーをクリア
-        commandBuffer_.SetRenderTarget(backTexID_);
+        commandBuffer_.SetRenderTarget(textMaskID_);
         commandBuffer_.ClearRenderTarget(false, true, Color.black);
 
         // 描画先を指定する
-        RenderTargetIdentifier[] identifiers = { BuiltinRenderTextureType.GBuffer0, backTexID_};
+        RenderTargetIdentifier[] identifiers = { BuiltinRenderTextureType.GBuffer0, textMaskID_};
 		commandBuffer_.SetRenderTarget(identifiers, BuiltinRenderTextureType.CameraTarget);
 
 
